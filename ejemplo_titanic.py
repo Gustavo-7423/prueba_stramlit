@@ -1,55 +1,47 @@
-import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
+# Configuración de la barra lateral
+st.sidebar.title("Esta es una prueba")
+st.sidebar.header("Hola esto es una barra lateral")
+st.sidebar.write("Barra lateral")
 
-# Carga el archivo CSV "database_titanic.csv" en un DataFrame de pandas.
-df = pd.read_csv("database_titanic.csv")
+# Cargar y mostrar una imagen en la barra lateral
+st.sidebar.image("madrir.png")
 
-# Muestra un título y una descripción en la aplicación Streamlit.
-st.write("""
-# Mi primera aplicación interactiva
-## Gráficos usando la base de datos del Titanic
-""")
+# Botón en la barra lateral que muestra un mensaje cuando se hace clic
+if st.sidebar.button("Clik en la barra lateral"):
+    st.sidebar.write("Hice un botón lateral")
 
-# Usando la notación "with" para crear una barra lateral en la aplicación Streamlit.
-with st.sidebar:
-    # Título para la sección de opciones en la barra lateral.
-    st.write("# Opciones")
+# Campo de texto en la barra lateral donde el usuario puede escribir algo
+user_input = st.sidebar.text_input("Escribe algo en la barra")
+st.sidebar.write("Escribiste en la barra:", user_input)
+
+# Configuración de la página principal
+st.title("Esta es mi primera página")
+st.header("Mi primera página")
+st.image("madrir.png")
+
+# Cargar archivo CSV
+uploaded_file = st.file_uploader("Datos_de_la_bolsa_500", type=["csv"])
+if uploaded_file is not None:
+    # Leer el archivo CSV
+    df = pd.read_csv(uploaded_file, sep=';')
     
-    # Crea un control deslizante (slider) que permite al usuario seleccionar un número de bins
-    # en el rango de 0 a 10, con un valor predeterminado de 2.
-    div = st.slider('Número de bins:', 0, 10, 2)
+    # Mostrar los datos del archivo CSV
+    st.write("Datos_de_la_bolsa_500:")
+    st.dataframe(df)
 
-        
-    # Muestra el valor actual del slider en la barra lateral.
-    st.write("Bins=", div)
-with st.sidebar:
-    st.write("#Colores")
-# Desplegamos un histograma con los datos del eje X
-fig, ax = plt.subplots(1, 2, figsize=(10, 3))
-ax[0].hist(df["Age"], bins=div)
-ax[0].set_xlabel("Edad")
-ax[0].set_ylabel("Frecuencia")
-ax[0].set_title("Histograma de edades")
+    # Selección de columnas para el gráfico
+    st.write("Seleccione las columnas para el gráfico:")
+    x_column = st.selectbox("Columna para el eje X", df.columns)
+    y_column = st.selectbox("Columna para el eje Y", df.columns)
 
-# Tomando datos para hombres y contando la cantidad
-df_male = df[df["Sex"] == "male"]
-cant_male = len(df_male)
+    # Crear el gráfico si ambas columnas están seleccionadas
+    if x_column and y_column:
+        fig, ax = plt.subplots()
+        ax.plot(df[x_column], df[y_column], label=f"{y_column} vs {x_column}", color="blue")
+        ax.set_title(f"{y_column} vs {x_column}")
+        ax.set_xlabel(x_column)
+        ax.set_ylabel(y_column)
+        ax.legend()
 
-# Tomando datos para mujeres y contando la cantidad
-df_female = df[df["Sex"] == "female"]
-cant_female = len(df_female)
-
-ax[1].bar(["Masculino", "Femenino"], [cant_male, cant_female], color = "red")
-ax[1].set_xlabel("Sexo")
-ax[1].set_ylabel("Cantidad")
-ax[1].set_title('Distribución de hombres y mujeres')
-
-# Desplegamos el gráfico
-st.pyplot(fig)
-
-st.write("""
-## Muestra de datos cargados
-""")
-# Graficamos una tabla
-st.table(df.head())
+        # Mostrar el gráfico en Streamlit
+        st.pyplot(fig)
